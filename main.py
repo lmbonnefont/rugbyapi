@@ -22,11 +22,11 @@ def get_db():
         db.close()
 
 @app.get("/players/", response_model=List[schemas.Player])
-def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def list_players(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     players = crud.get_players(db, skip=skip, limit=limit)
     return players
 
 
 @app.post("/players/", response_model=schemas.Player)
-def create_user(player: schemas.Player, db: Session = Depends(get_db)):
+def create_player(player: schemas.Player, db: Session = Depends(get_db)):
     print(crud.create_player(db=db, player=player))

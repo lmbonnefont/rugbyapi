@@ -21,6 +21,10 @@ def get_db():
     finally:
         db.close()
 
+@app.get("/")
+def home():
+    return "Hello world"
+
 @app.get("/players/", response_model=List[schemas.Player])
 def list_players(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     players = crud.get_players(db, skip=skip, limit=limit)

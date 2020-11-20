@@ -4,18 +4,19 @@
 .DEFAULT_GOAL := help
 
 run:
-	uvicorn main:app
+	docker-compose up
 
 local-run:
 	. venv/bin/activate && \
 	uvicorn main:app --reload
 
-build:
+.PHONY: build-local-venv
+build-local-venv: ## Build local venv
 	python3 -m venv venv
 
 build-image:
 	docker build -t fastapilm .
-	docker run -it --rm fastapilm
+	docker-compose build
 
 
 # Implements this pattern for autodocumenting Makefiles:

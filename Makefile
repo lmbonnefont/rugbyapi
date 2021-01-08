@@ -2,6 +2,11 @@
 # Don't forget to add a comment that starts with a ## after the name of each target
 # to see it included in the help output. See the 'help' target comments for details.
 .DEFAULT_GOAL := help
+NAME = rugbyapi
+TRAVIS_COMMIT ?= $(shell git rev-parse HEAD)
+TRAVIS_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)-local
+CURRENT_DOCKER_IMAGE_NAME = $(shell echo "${TRAVIS_COMMIT}-${TRAVIS_BRANCH}" | sed 's/[^0-9[:alpha:]_-]/-/g')
+ECR_REPOSITORY = 154005363564.dkr.ecr.us-east-1.amazonaws.com
 
 run:
 	docker-compose up
@@ -17,6 +22,21 @@ build-local-venv: ## Build local venv
 build-image:
 	docker build -t fastapilm .
 	docker-compose build
+
+.PHONY: push-image
+push-image: ## Push mario image on ECR repository
+	docker tag ${NAME} ${ECR_REPOSITORY}/${NAME}:${CURRENT_DOCKER_IMAGE_NAME}
+	docker push ${ECR_REPOSITORY}/${NAME}:${CURRENT_DOCKER_IMAGE_NAME}
+
+.PHONY: pull-image
+pull-image: ## Pull current version mario image from ECR repository
+	docker pull ${ECR_REPOSITORY}/${NAME}:${CURRENT_DOCKER_IMAGE_NAME}
+
+.PHONY: aws-login
+aws-login: ## Login on AWS ECR
+	aws ecr get-login-password --region us-east-1 | \
+		docker login --password-stdin -u AWS $(ECR_REPOSITORY)
+
 
 
 # Implements this pattern for autodocumenting Makefiles:

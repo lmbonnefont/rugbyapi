@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    service: rugbyapi
+  name: rugbyapi
+  namespace: lmbonnefont
+spec:
+  replicas: 1
+  strategy:
+    type: "RollingUpdate"
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      service: rugbyapi
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        service: rugbyapi
+    spec:
+      containers:
+      - name: rugbyapi
+        image: 154005363564.dkr.ecr.us-east-1.amazonaws.com/rugbyapi:latest
+        imagePullPolicy: Always
+        env:
+        - name: BKM_ENV
+          value: "tleveque"
+        - name: BKM_COUNTRY
+          value: "io"
+        - name: ENV
+          value: "staging"
+        - name: DATADOG_ENV
+          value: "staging-tleveque"
+        - name: DATADOG_AGENT_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        envFrom:
+          - configMapRef:
+              name: rugbyapi-staging
+        resources:
+          requests:
+            memory: "250Mi"
+            cpu: "200m"
+          limits:
+            memory: "400Mi"
+            cpu: "300m"
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 8080
+          name: http-8080
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+      restartPolicy: Always
+status: {}

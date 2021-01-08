@@ -4,11 +4,19 @@ services:
         build: .
         ports:
             - "8080:8080"
+        links:
+            -   db
         environment:
-            DATABASE_URL: "sqlite:///./sql_app.db"
+            DATABASE_URL: "postgres://rugbydbuser:password@db:5432/rugbydb"
+        volumes:
+            -   .:/usr/src/app
 
     db:
         image: postgres:13.1
         restart: always
         environment:
             POSTGRES_PASSWORD: password
+            POSTGRES_DB: rugbydb
+            POSTGRES_USER: rugbydbuser
+        volumes:
+            - ./datavolume:/var/lib/postgresql/data/
